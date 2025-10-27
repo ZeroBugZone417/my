@@ -458,35 +458,34 @@ function setupCommandHandlers(socket, number) {
             switch (command) {   
 //================================ ALIVE ==================================
                 case 'alive': {
-                    const startTime = socketCreationTime.get(number) || Date.now();
-                    const uptime = Math.floor((Date.now() - startTime) / 1000);
-                    const hours = Math.floor(uptime / 3600);
-                    const minutes = Math.floor((uptime % 3600) / 60);
-                    const seconds = Math.floor(uptime % 60);
+    const startTime = socketCreationTime.get(number) || Date.now();
+    const uptime = Math.floor((Date.now() - startTime) / 1000);
+    const hours = Math.floor(uptime / 3600);
+    const minutes = Math.floor((uptime % 3600) / 60);
+    const seconds = Math.floor(uptime % 60);
 
-     const title = '👋 𝐈𝐦 𝐀𝐥𝐢𝐯𝐞 𝐍𝐨𝐰!';
-     const content = `𝐈𝐦 𝐂𝐲𝐛𝐞𝐫 𝐍𝐞𝐭 𝐌𝐢𝐧𝐢 𝐁𝐎𝐓 𝐌𝐚𝐝𝐞 𝐁𝐲 𝐂𝐲𝐛𝐞𝐫 𝐝𝐞𝐯𝐬.\n\n` +
-                    `🧬 \`𝚟𝚎𝚛𝚜𝚒𝚘𝚗:\` ${config.BOT_VERSION}\n` +
-                    `📡 \`𝙷𝚘𝚜𝚝:\` Heroku\n` +
-                    `⏰ \`𝚁𝚞𝚗𝚝𝚒𝚖𝚎:\` ${hours}h ${minutes}m ${seconds}s\n` +
-                    `👨‍💻 \`𝙾𝚠𝚗𝚎𝚛:\` ${config.OWNER_NAME}\n\n` +
-                    `🌐 ¢увєя ηєт мιηι вσт is a lightweight yet powerful WhatsApp user bot ⚡ built to handle downloads, searches, utilities, and fun commands — all in one place. Designed for speed 🚀, stability 🛡️, and style 🎭, it’s your personal cyber assistant on WhatsApp.\n` +
-                    `⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌\n` +
-                    `𝑩𝑶𝑻 𝑾𝑬𝑩: තව නැතෝ\n` +
-                    `▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n` +
-                    `𝑪𝑯𝑨𝑵𝑬𝑳: තව නැ\n` +
-                    `▬▬▬▬▬▬▬▬▬▬▬▬▬▬`;
-     const footer = config.BOT_FOOTER;
+    const caption = `🤖 *NeuroX Bot is Online!*\n\n` +
+                    `🧬 Version: ${config.BOT_VERSION}\n` +
+                    `📡 Host: ${config.HOST || 'Render'}\n` +
+                    `⏰ Uptime: ${hours}h ${minutes}m ${seconds}s\n` +
+                    `👨‍💻 Owner: ${config.OWNER_NAME}\n\n` +
+                    `Select an option below 👇`;
 
-                  
-                                       
-                    await socket.sendMessage(sender, {
-                        image: { url: config.IMAGE_PATH },
-                        caption: formatMessage(title, content, footer),
-                        quoted: msg
-                    });
-                    break;
-                 }
+    await socket.sendMessage(sender, {
+        image: { url: config.IMAGE_PATH || 'https://telegra.ph/file/ba6c44f2cddcbca6e8907.jpg' },
+        caption: caption,
+        footer: '🚀 NeuroX Bot — Stay Smart, Stay Ahead',
+        buttons: [
+            { buttonId: 'menu', buttonText: { displayText: '📜 MENU' }, type: 1 },
+            { buttonId: 'owner', buttonText: { displayText: '👨‍💻 OWNER INFO' }, type: 1 },
+            { buttonId: 'ping', buttonText: { displayText: '⚙️ STATUS' }, type: 1 }
+        ],
+        headerType: 4,
+        quoted: msg
+    });
+    break;
+}
+
 //================================ MENU ==================================
                     case 'menu': {
                       const startTime = socketCreationTime.get(number) || Date.now();
