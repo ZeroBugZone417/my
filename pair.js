@@ -533,9 +533,9 @@ function setupCommandHandlers(socket, number) {
                     });
 
                     const kariyane = `┏━❐  \`H E L L O W\`
-┃ *⭔ Itz:* NOVA~X
+┃ *⭔ Itz:* NeroX Mini Bot
 ┃ *⭔ Type:* MINI BOT
-┃ *⭔ Platform:* Heroku
+┃ *⭔ Platform:*Render
 ┃ *⭔ UpTime:* ${hours}h ${minutes}m ${seconds}s
 ┗━❐
 
@@ -570,7 +570,7 @@ function setupCommandHandlers(socket, number) {
                             },
                             externalAdReply: {
                                 title: 'ᴀ ᴍᴜʟᴛɪ ᴅᴇᴠɪᴄᴇ ᴍɪɴɪ ᴡʜᴀᴛꜱᴀᴘᴘ ʙᴏᴛ ®',
-                                body: '@ZEUS-MINI 🧼',
+                                body: 'NeroX Mini 🧼',
                                 mediaType: 1,
                                 sourceUrl: "https://zeus-mini-bot-7ceefd15b263.herokuapp.com/",
                                 thumbnailUrl: 'https://i.ibb.co/bg2MqkfW/Clicker-X-Md.jpg',
