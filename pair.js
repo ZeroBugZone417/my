@@ -40,14 +40,13 @@ const config = {
     NEWSLETTER_MESSAGE_ID: '428',
     OTP_EXPIRY: 300000,
     NEWS_JSON_URL: '',
-    BOT_NAME: 'NeroX Bt',
+    BOT_NAME: 'NeroX BOT',
     OWNER_NAME: 'Dineth Sudarshana',
     OWNER_NUMBER: '94769983151',
     BOT_VERSION: '1.0.0',
     BOT_FOOTER: '> ᴍᴀɪɴᴛᴀɴᴀɴᴄᴇ ʙʏ ᴢᴇʀᴏ ʙᴜɢ ᴢᴏɴᴇ.',
     CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbAUZUeJENy0fOUS5E3J'
-     THARUZZ_FOOTER: "> ©POWERD BY THARUZZ | OFC",
-     THARUZZ_IMAGE_URL: "https://files.catbox.moe/iik6l0.png"
+    
 }
 };
 
@@ -851,7 +850,7 @@ case 'ttdl': {
     }];
     
     await socket.sendMessage(from, {
-      image: { url: ttResponseTharuzz.result.cover || config.THARUZZ_IMAGE_URL },
+      image: { url: ttResponseTharuzz.result.cover || config.IMAGE_PATH },
       caption: ttCap,
       buttons: buttonPanel,
       headerType: 1,
@@ -882,14 +881,14 @@ case 'ttdltharuzz': {
     if ( mediaType === "NO_WM" ) {
       await socket.sendMessage(from, {
         video: {url: response.result.hd},
-        caption: `*📌 \Title:\* ${response.result.title}\n\n${config.THARUZZ_FOOTER}`
+        caption: `*📌 \Title:\* ${response.result.title}\n\n${config. BOT_FOOTER}`
       }, {quoted:msg})
     };
     
     if ( mediaType === "WM" ) {
       await socket.sendMessage(from, {
         video: {url: response.result.sd},
-        caption: `*📌 \Title:\* ${response.result.title}\n\n${config.THARUZZ_FOOTER}`
+        caption: `*📌 \Title:\* ${response.result.title}\n\n${config. BOT_FOOTER}`
       }, {quoted:msg})
     }
     
