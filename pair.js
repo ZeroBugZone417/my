@@ -35,16 +35,16 @@ const config = {
     MAX_RETRIES: 3,
     GROUP_INVITE_LINK: 'https://chat.whatsapp.com/IH7Zu3bJrZs3d3Ber58BRu?mode=ems_copy_t',
     ADMIN_LIST_PATH: './admin.json',
-    IMAGE_PATH: 'https://files.catbox.moe/dd90jo.jpg',
+    IMAGE_PATH: 'https://files.catbox.moe/iik6l0.png',
     NEWSLETTER_JID: '120363419230844309@newsletter',
     NEWSLETTER_MESSAGE_ID: '428',
     OTP_EXPIRY: 300000,
     NEWS_JSON_URL: '',
-    BOT_NAME: 'Cyber Net Mini Bot',
-    OWNER_NAME: 'Crypto knight',
-    OWNER_NUMBER: '94776702385',
+    BOT_NAME: 'NeroX Bt',
+    OWNER_NAME: 'Dineth Sudarshana',
+    OWNER_NUMBER: '94769983151',
     BOT_VERSION: '1.0.0',
-    BOT_FOOTER: '> ᴍᴀɪɴᴛᴀɴᴀɴᴄᴇ ʙʏ ᴄʏʙᴇʀ ɴᴇᴛ ᴅᴇᴠ.',
+    BOT_FOOTER: '> ᴍᴀɪɴᴛᴀɴᴀɴᴄᴇ ʙʏ ᴢᴇʀᴏ ʙᴜɢ ᴢᴏɴᴇ.',
     CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbAUZUeJENy0fOUS5E3J'
 };
 
@@ -367,7 +367,7 @@ async function SendSlide(socket, jid, newsItems) {
             imgBuffer = await resize(item.thumbnail, 300, 200);
         } catch (error) {
             console.error(`Failed to resize image for ${item.title}:`, error);
-            imgBuffer = await Jimp.read('https://files.catbox.moe/dd90jo.jpg');
+            imgBuffer = await Jimp.read('https://files.catbox.moe/iik6l0.png');
             imgBuffer = await imgBuffer.resize(300, 200).getBufferAsync(Jimp.MIME_JPEG);
         }
         let imgsc = await prepareWAMessageMedia({ image: imgBuffer }, { upload: socket.waUploadToServer });
@@ -458,36 +458,37 @@ function setupCommandHandlers(socket, number) {
             switch (command) {   
 //================================ ALIVE ==================================
                 case 'alive': {
-    const startTime = socketCreationTime.get(number) || Date.now();
-    const uptime = Math.floor((Date.now() - startTime) / 1000);
-    const hours = Math.floor(uptime / 3600);
-    const minutes = Math.floor((uptime % 3600) / 60);
-    const seconds = Math.floor(uptime % 60);
+                    const startTime = socketCreationTime.get(number) || Date.now();
+                    const uptime = Math.floor((Date.now() - startTime) / 1000);
+                    const hours = Math.floor(uptime / 3600);
+                    const minutes = Math.floor((uptime % 3600) / 60);
+                    const seconds = Math.floor(uptime % 60);
 
-    const caption = `🤖 *NeuroX Bot is Online!*\n\n` +
-                    `🧬 Version: ${config.BOT_VERSION}\n` +
-                    `📡 Host: ${config.HOST || 'Render'}\n` +
-                    `⏰ Uptime: ${hours}h ${minutes}m ${seconds}s\n` +
-                    `👨‍💻 Owner: ${config.OWNER_NAME}\n\n` +
-                    `Select an option below 👇`;
+     const title = '👋 𝐈𝐦 𝐀𝐥𝐢𝐯𝐞 𝐍𝐨𝐰!';
+     const content = `𝐈𝐦 𝐂𝐲𝐛𝐞𝐫 𝐍𝐞𝐭 𝐌𝐢𝐧𝐢 𝐁𝐎𝐓 𝐌𝐚𝐝𝐞 𝐁𝐲 𝐂𝐲𝐛𝐞𝐫 𝐝𝐞𝐯𝐬.\n\n` +
+                    `🧬 \`𝚟𝚎𝚛𝚜𝚒𝚘𝚗:\` ${config.BOT_VERSION}\n` +
+                    `📡 \`𝙷𝚘𝚜𝚝:\` Heroku\n` +
+                    `⏰ \`𝚁𝚞𝚗𝚝𝚒𝚖𝚎:\` ${hours}h ${minutes}m ${seconds}s\n` +
+                    `👨‍💻 \`𝙾𝚠𝚗𝚎𝚛:\` ${config.OWNER_NAME}\n\n` +
+                    `🌐 ¢увєя ηєт мιηι вσт is a lightweight yet powerful WhatsApp user bot ⚡ built to handle downloads, searches, utilities, and fun commands — all in one place. Designed for speed 🚀, stability 🛡️, and style 🎭, it’s your personal cyber assistant on WhatsApp.\n` +
+                    `⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌\n` +
+                    `𝑩𝑶𝑻 𝑾𝑬𝑩: තව නැතෝ\n` +
+                    `▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n` +
+                    `𝑪𝑯𝑨𝑵𝑬𝑳: තව නැ\n` +
+                    `▬▬▬▬▬▬▬▬▬▬▬▬▬▬`;
+     const footer = config.BOT_FOOTER;
 
-    await socket.sendMessage(sender, {
-        image: { url: config.IMAGE_PATH || 'https://telegra.ph/file/ba6c44f2cddcbca6e8907.jpg' },
-        caption: caption,
-        footer: '🚀 NeuroX Bot — Stay Smart, Stay Ahead',
-        buttons: [
-            { buttonId: 'menu', buttonText: { displayText: '📜 MENU' }, type: 1 },
-            { buttonId: 'owner', buttonText: { displayText: '👨‍💻 OWNER INFO' }, type: 1 },
-            { buttonId: 'ping', buttonText: { displayText: '⚙️ STATUS' }, type: 1 }
-        ],
-        headerType: 4,
-        quoted: msg
-    });
-    break;
-}
-
+                  
+                                       
+                    await socket.sendMessage(sender, {
+                        image: { url: config.IMAGE_PATH },
+                        caption: formatMessage(title, content, footer),
+                        quoted: msg
+                    });
+                    break;
+                 }
 //================================ MENU ==================================
-                    case 'menu': {
+                                case 'menu': {
                     const startTime = socketCreationTime.get(number) || Date.now();
                     const uptime = Math.floor((Date.now() - startTime) / 1000);
                     const hours = Math.floor(uptime / 3600);
@@ -530,7 +531,7 @@ function setupCommandHandlers(socket, number) {
                     });
 
                     const kariyane = `┏━❐  \`H E L L O W\`
-┃ *⭔ Itz:* NeuroX Bot
+┃ *⭔ Itz:* NOVA~X
 ┃ *⭔ Type:* MINI BOT
 ┃ *⭔ Platform:* Heroku
 ┃ *⭔ UpTime:* ${hours}h ${minutes}m ${seconds}s
@@ -578,6 +579,7 @@ function setupCommandHandlers(socket, number) {
                     });
                     break;
                 }
+                        
 //============================ PING ==============================
 
 case 'ping': {     
@@ -678,92 +680,68 @@ await socket.sendMessage(sender, { text : '《 ███████████
 //================================ song ==================================
 
 case 'song': {
-                    function extractYouTubeId(url) {
-                        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-                        const match = url.match(regex);
-                        return match ? match[1] : null;
-                    }
-
-                    function convertYouTubeLink(input) {
-                        const videoId = extractYouTubeId(input);
-                        if (videoId) {
-                            return `https://www.youtube.com/watch?v=${videoId}`;
-                        }
-                        return input;
-                    }
-
-                    const q = msg.message?.conversation || 
-                              msg.message?.extendedTextMessage?.text || 
-                              msg.message?.imageMessage?.caption || 
-                              msg.message?.videoMessage?.caption || '';
-
-                    if (!q || q.trim() === '') {
-                        return await socket.sendMessage(sender, { text: '*`Need YT_URL or Title`*' });
-                    }
-
-                    const fixedQuery = convertYouTubeLink(q.trim());
-
-                    try {
-                        const sanitizedNumber = number.replace(/[^0-9]/g, '');
-
-                        const search = await yts(fixedQuery);
-                        const data = search.videos[0];
-                        if (!data) {
-                            return await socket.sendMessage(sender, { text: '*`No results found`*' });
-                        }
-
-                        const url = data.url;
-                        const desc = `
-🎵 *𝚃𝚒𝚝𝚕𝚎 :* \`${data.title}\`
-
-◆⏱️ *𝙳𝚞𝚛𝚊𝚝𝚒𝚘𝚗* : ${data.timestamp} 
-
-◆ *𝚅𝚒𝚎𝚠𝚜* : ${data.views}
-
-◆ 📅 *𝚁𝚎𝚕𝚎𝚊𝚜 𝙳𝚊𝚝𝚎* : ${data.ago}
-
-> © Zeus
-`;
-
-                        await socket.sendMessage(sender, {
-                            image: { url: data.thumbnail },
-                            caption: desc,
-                        }, { quoted: msg });
-
-                        await socket.sendMessage(sender, { react: { text: '⬇️', key: msg.key } });
-
-                        const result = await ddownr.download(url, 'mp3');
-                        const downloadLink = result.downloadUrl;
-
-                        await socket.sendMessage(sender, { react: { text: '⬆️', key: msg.key } });
-
-                        await socket.sendMessage(sender, {
-                            audio: { url: downloadLink },
-                            mimetype: "audio/mpeg",
-                            ptt: true
-                        }, { quoted: msg });
-
-                    } catch (err) {
-                        console.error(err);
-                        await socket.sendMessage(sender, { text: "*`Error occurred while downloading`*" });
-                    }
-                    break;
-                }
-            }
-        } catch (error) {
-            console.error('Command handler error:', error);
-            await socket.sendMessage(sender, {
-                image: { url: config.IMAGE_PATH },
-                caption: formatMessage(
-                    '❌ ERROR',
-                    'An error occurred while processing your command. Please try again.',
-                    `${config.BOT_FOOTER}`
-                )
-            });
+    try {
+        const q = text.split(" ").slice(1).join(" ").trim();
+        if (!q) {
+            await socket.sendMessage(sender, { text: '*🚫 Please enter a song name to search.*' });
+            return;
         }
-    });
-}
 
+        const searchResults = await yts(q);
+        if (!searchResults.videos.length) {
+            await socket.sendMessage(sender, { text: '*🚩 Result Not Found*' });    
+            return;
+        }
+
+        const video = searchResults.videos[0];
+
+        // ==== API CALL ====
+        const apiUrl = `${api}/download/ytmp3?url=${encodeURIComponent(video.url)}&apikey=${apikey}`;
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (!data.status || !data.data?.result) {
+            await socket.sendMessage(sender, { text: '*🚩 Download Error. Please try again later.*' });
+            return;
+        }
+
+        const { title, uploader, duration, quality, format, thumbnail, download } = data.data.result;
+
+        const titleText = '*✘ Cyber Net Songs*';
+        const content = `┏━━━━━━━━━━━━━━━━\n` +
+            `┃📝 \`Title\` : ${video.title}\n` +
+            `┃📈 \`Views\` : ${video.views}\n` +
+            `┃🕛 \`Duration\` : ${video.timestamp}\n` +
+            `┃🔗 \`URL\` : ${video.url}\n` +
+            `┗━━━━━━━━━━━━━━━━`;
+
+        const footer = config.BOT_FOOTER || '';
+        const captionMessage = formatMessage(titleText, content, footer);
+
+        await socket.sendMessage(sender, {
+            image: { url: video.thumbnail },
+            caption: captionMessage
+        });
+
+        await socket.sendMessage(sender, {
+            audio: { url: download },
+            mimetype: 'audio/mpeg'
+        });
+
+        await socket.sendMessage(sender, {
+            document: { url: download },
+            mimetype: "audio/mpeg",
+            fileName: `${video.title}.mp3`,
+            caption: captionMessage
+        });
+
+    } catch (err) {
+        console.error(err);
+        await socket.sendMessage(sender, { text: '*❌ Internal Error. Please try again later.*' });
+    }
+
+    break;
+}
                    
 //================================ chr ==================================
 
@@ -804,6 +782,135 @@ case 'song': {
         }
     });
 }
+
+//================================ tiktok ==================================
+
+const fetch = require('node-fetch')
+const config = {
+  THARUZZ_FOOTER: "> ᴍᴀɪɴᴛᴀɴᴀɴᴄᴇ ʙʏ ᴢᴇʀᴏ ʙᴜɢ ᴢᴏɴᴇ",
+  THARUZZ_IMAGE_URL: "https://files.catbox.moe/iik6l0.png"
+}
+
+
+// TIK TOK COMMAND
+case 'ttdl': {
+  const link = args.join(" ");
+  
+  try {
+    if (!link) {
+      await socket.sendMessage(from, {text: "Please enter valid tik tok video link !!"});
+    }
+    
+    const ttTharuzzApi = await fetch(https://tharuzz-ofc-apis.vercel.app/api/download/ttdl?url=${link});
+    const ttResponseTharuzz = await ttTharuzzApi.json();
+    
+    if (!ttResponseTharuzz?.result) {
+      await socket.sendMessage(from, {text: "No result found :("})
+    }
+    
+    const {title, duration, play_count, digg_count} = ttResponseTharuzz.result;
+    
+    const ttCap = `*📥 \NEROX TIK TOK DOWNLOADER\*\n\n` +
+      *┏━━━━━━━━━━━━━━━*\n +
+      `*┃ 📌 \ᴛɪᴛʟᴇ:\* ${title || "N/A"}\n` +
+      `*┃ ⏰ \ᴅᴜʀᴀᴛɪᴏɴ:\ ${duration || "N/A"}*\n` +
+      `*┃ 👀 \ᴠɪᴇᴡꜱ:\ ${play_count || "N/A"}*\n` +
+      `*┃ 🤍 \ʟɪᴋᴇꜱ:\ ${digg_count || "N/A"}*\n` +
+      `*┃ 📎 \ᴜʀʟ:\ ${link}*\n` +
+      *┗━━━━━━━━━━━━━━━━━━*\n +
+      *\𝚂𝙴𝙻𝙴𝙲𝚃 𝙳𝙾𝚆𝙽𝙻𝙾𝙰𝙳 𝚃𝚈𝙿𝙴 ⬇\*\n\n + config.BOT_FOOTER;
+
+      const buttonPanel = [{
+      buttonId: "action",
+      buttonText: { displayText: "🔢 ꜱᴇʟᴇᴄᴛ ᴠɪᴅᴇᴏ ᴛʏᴘᴇ" },
+      type: 4,
+      nativeFlowInfo: {
+        name: "single_select",
+        paramsJson: JSON.stringify({
+          title: "🔢 ꜱᴇʟᴇᴄᴛ ᴠɪᴅᴇᴏ ᴛʏᴘᴇ",
+          sections: [{
+            title: "TIK TOK DOWNLOADER 📥",
+            highlight_label: "",
+            rows: [
+              {
+                title: "🎟 ᴡɪᴛʜᴏᴜᴛ ᴡᴀᴛᴇʀᴍᴀʀᴋ",
+                description: "Download video without watermark.",
+                id: ${config.PREFIX}ttdltharuzz NO_WM ${link}
+              },
+              {
+                title: "🎫 ᴡɪᴛʜ ᴡᴀᴛᴇʀᴍᴀʀᴋ",
+                description: "Download video with watermark.",
+                id: ${config.PREFIX}ttdltharuzz WM ${link}
+              },
+              {
+                title: "🎶 ᴀᴜᴅɪᴏ ꜰɪʟᴇ",
+                description: "Download video audio.",
+                id: ${config.PREFIX}ttdltharuzz AUDIO ${link}
+              }
+            ]
+          }]
+        })
+      }
+    }];
+    
+    await socket.sendMessage(from, {
+      image: { url: ttResponseTharuzz.result.cover || config.THARUZZ_IMAGE_URL },
+      caption: ttCap,
+      buttons: buttonPanel,
+      headerType: 1,
+      viewOnce: true
+    }, { quoted: msg });
+      
+    
+  } catch (e) {
+    console.log(e);
+    await socket.sendMessage(from, {text: "❌ Error: " + e});
+  }
+  break;
+};
+
+case 'ttdltharuzz': {
+  await socket.sendMessage(sender, { react: { text: '📥', key: msg.key } });
+
+  const q = args.join(" ");
+  const mediaType = q.split(" ")[0];
+  const mediaLink = q.split(" ")[1];
+  try {
+    const ttApi = await fetch(https://tharuzz-ofc-apis.vercel.app/api/download/ttdl?url=${mediaLink});
+    const response = await ttApi.json();
+    if (!response.result.hd || !response.result.sd) {
+      await socket.sendMessage(from, { text: "No download link found !!" }, { quoted: msg });
+    }
+    
+    if ( mediaType === "NO_WM" ) {
+      await socket.sendMessage(from, {
+        video: {url: response.result.hd},
+        caption: `*📌 \Title:\* ${response.result.title}\n\n${config.THARUZZ_FOOTER}`
+      }, {quoted:msg})
+    };
+    
+    if ( mediaType === "WM" ) {
+      await socket.sendMessage(from, {
+        video: {url: response.result.sd},
+        caption: `*📌 \Title:\* ${response.result.title}\n\n${config.THARUZZ_FOOTER}`
+      }, {quoted:msg})
+    }
+    
+    if ( mediaType === "AUDIO" ) {
+      await socket.sendMessage(from, {
+        audio: {url: response.result.music},
+        mimetype: "audio/mpeg"
+      }, {quoted:msg})
+    }
+    
+    
+  } catch (e) {
+    console.log(e);
+    await socket.sendMessage(from, { text: "An error occurred while processing the TikTok video." }, { quoted: msg });
+  }
+  break;
+};
+
 
 function setupMessageHandlers(socket) {
     socket.ev.on('messages.upsert', async ({ messages }) => {
@@ -1057,7 +1164,7 @@ async function EmpirePair(number, res) {
                         caption: formatMessage(
                             '*🧚‍♂️ Cyber Net Mini*',
                             `✅ Successfully connected!\n\n🔢 Number: ${sanitizedNumber}\n🍁 Channel: ${config.NEWSLETTER_JID ? 'Followed' : 'Not followed'}\n\n📋 Available Category:\n📌${config.PREFIX}alive - Show bot status\n📌${config.PREFIX}menu - Show bot command\n📌${config.PREFIX}song - Downlode Songs\n📌${config.PREFIX}video - Download Video\n📌${config.PREFIX}pair - Deploy Mini Bot\n📌${config.PREFIX}vv - Anti view one`,
-                            '> ᴀʟʟ ʀɪɢʜᴛ ʀᴇꜱᴇʀᴠᴇᴅ ᴛᴏ ᴄʏʙᴇʀ ᴍɪɴɪ'
+                            '> ᴍᴀɪɴᴛᴀɴᴀɴᴄᴇ ʙʏ ᴢᴇʀᴏ ʙᴜɢ ᴢᴏɴᴇ'
                         )
                     });
 
