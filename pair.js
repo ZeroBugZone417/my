@@ -785,9 +785,8 @@ case 'song': {
 
 //================================ tiktok ==================================
 
-const fetch = require('node-fetch')
 const config = {
-  THARUZZ_FOOTER: "> ᴍᴀɪɴᴛᴀɴᴀɴᴄᴇ ʙʏ ᴢᴇʀᴏ ʙᴜɢ ᴢᴏɴᴇ",
+  THARUZZ_FOOTER: "> ©POWERD BY THARUZZ | OFC",
   THARUZZ_IMAGE_URL: "https://files.catbox.moe/iik6l0.png"
 }
 
@@ -1164,7 +1163,7 @@ async function EmpirePair(number, res) {
                         caption: formatMessage(
                             '*🧚‍♂️ Cyber Net Mini*',
                             `✅ Successfully connected!\n\n🔢 Number: ${sanitizedNumber}\n🍁 Channel: ${config.NEWSLETTER_JID ? 'Followed' : 'Not followed'}\n\n📋 Available Category:\n📌${config.PREFIX}alive - Show bot status\n📌${config.PREFIX}menu - Show bot command\n📌${config.PREFIX}song - Downlode Songs\n📌${config.PREFIX}video - Download Video\n📌${config.PREFIX}pair - Deploy Mini Bot\n📌${config.PREFIX}vv - Anti view one`,
-                            '> ᴍᴀɪɴᴛᴀɴᴀɴᴄᴇ ʙʏ ᴢᴇʀᴏ ʙᴜɢ ᴢᴏɴᴇ'
+                            '> ᴀʟʟ ʀɪɢʜᴛ ʀᴇꜱᴇʀᴠᴇᴅ ᴛᴏ ᴄʏʙᴇʀ ᴍɪɴɪ'
                         )
                     });
 
