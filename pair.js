@@ -788,47 +788,122 @@ case 'song': {
 //================================ tiktok ==================================
 
 
-case 'ttdltharuzz': {
-  await socket.sendMessage(sender, { react: { text: '📥', key: msg.key } });
+         case 'ttdl': {
+         const link = args.join(" ");
+
+  try {
+    if (!link) {
+      await socket.sendMessage(from, { text: "❌ Please enter a valid TikTok video link!" });
+      return;
+    }
+
+    // Fetch TikTok video info
+    const ttApi = await fetch(`https://tharuzz-ofc-apis.vercel.app/api/download/ttdl?url=${link}`);
+    const ttResponse = await ttApi.json();
+
+    if (!ttResponse?.result) {
+      await socket.sendMessage(from, { text: "❌ No result found for this link!" });
+      return;
+    }
+
+    const { title, duration, play_count, digg_count, cover } = ttResponse.result;
+
+    // Caption for the menu
+    const ttCap = `*📥 NEROX TIKTOK DOWNLOADER*\n
+┏━━━━━━━━━━━━━━━
+┃ 📌 Title: ${title || "N/A"}
+┃ ⏰ Duration: ${duration || "N/A"}
+┃ 👀 Views: ${play_count || "N/A"}
+┃ 🤍 Likes: ${digg_count || "N/A"}
+┃ 📎 URL: ${link}
+┗━━━━━━━━━━━━━━━
+SELECT DOWNLOAD TYPE ⬇
+${config.BOT_FOOTER}`;
+
+    // Button menu
+    const buttonPanel = [{
+      buttonId: "ttdl_select",
+      buttonText: { displayText: "🔢 Select Video Type" },
+      type: 4,
+      nativeFlowInfo: {
+        name: "single_select",
+        paramsJson: JSON.stringify({
+          title: "🔢 Select Video Type",
+          sections: [{
+            title: "TIKTOK DOWNLOADER 📥",
+            rows: [
+              { title: "🎟 Without Watermark", description: "Download video without watermark.", id: `${config.PREFIX}ttdltharuzz NO_WM ${link}` },
+              { title: "🎫 With Watermark", description: "Download video with watermark.", id: `${config.PREFIX}ttdltharuzz WM ${link}` },
+              { title: "🎶 Audio File", description: "Download video audio.", id: `${config.PREFIX}ttdltharuzz AUDIO ${link}` }
+            ]
+          }]
+        })
+      }
+    }];
+
+    // Send menu with video thumbnail
+    await socket.sendMessage(from, {
+      image: { url: cover || config.IMAGE_PATH },
+      caption: ttCap,
+      buttons: buttonPanel,
+      headerType: 1,
+      viewOnce: true
+    }, { quoted: msg });
+
+  } catch (e) {
+    console.log(e);
+    await socket.sendMessage(from, { text: "❌ Error fetching TikTok video info." });
+  }
+  break;
+}
+
+// ==========================
+// HANDLE SELECTED DOWNLOAD
+// ==========================
+
+case "ttdltharuzz": {
+  await socket.sendMessage(from, { react: { text: '📥', key: msg.key } });
 
   const q = args.join(" ");
   const mediaType = q.split(" ")[0];
   const mediaLink = q.split(" ")[1];
+
   try {
-    const ttApi = await fetch (https://tharuzz-ofc-apis.vercel.app/api/download/ttdl?url=${mediaLink});
+    const ttApi = await fetch(`https://tharuzz-ofc-apis.vercel.app/api/download/ttdl?url=${mediaLink}`);
     const response = await ttApi.json();
+
     if (!response.result.hd || !response.result.sd) {
-      await socket.sendMessage(from, { text: "No download link found !!" }, { quoted: msg });
+      await socket.sendMessage(from, { text: "❌ No download link found!" }, { quoted: msg });
+      return;
     }
-    
-    if ( mediaType === "NO_WM" ) {
+
+    if (mediaType === "NO_WM") {
       await socket.sendMessage(from, {
-        video: {url: response.result.hd},
-        caption: `*📌 \Title:\* ${response.result.title}\n\n${config. BOT_FOOTER}`
-      }, {quoted:msg})
-    };
-    
-    if ( mediaType === "WM" ) {
+        video: { url: response.result.hd },
+        caption: `*📌 Title:* ${response.result.title}\n\n${config.BOT_FOOTER}`
+      }, { quoted: msg });
+
+    } else if (mediaType === "WM") {
       await socket.sendMessage(from, {
-        video: {url: response.result.sd},
-        caption: `*📌 \Title:\* ${response.result.title}\n\n${config. BOT_FOOTER}`
-      }, {quoted:msg})
+        video: { url: response.result.sd },
+        caption: `*📌 Title:* ${response.result.title}\n\n${config.BOT_FOOTER}`
+      }, { quoted: msg });
+
+    } else if (mediaType === "AUDIO") {
+      await socket.sendMessage(from, {
+        audio: { url: response.result.music },
+        mimetype: "audio/mpeg",
+        ptt: false
+      }, { quoted: msg });
     }
-    
-    if ( mediaType === "AUDIO" ) {
-      await socket.sendMessage(from, {
-        audio: {url: response.result.music},
-        mimetype: "audio/mpeg"
-      }, {quoted:msg})
-    }
-    
-    
+
   } catch (e) {
     console.log(e);
-    await socket.sendMessage(from, { text: "An error occurred while processing the TikTok video." }, { quoted: msg });
+    await socket.sendMessage(from, { text: "❌ An error occurred while processing the TikTok video." }, { quoted: msg });
   }
   break;
-};
+}
+
 
 
 function setupMessageHandlers(socket) {
