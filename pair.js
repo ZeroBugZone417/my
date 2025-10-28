@@ -46,6 +46,9 @@ const config = {
     BOT_VERSION: '1.0.0',
     BOT_FOOTER: '> ᴍᴀɪɴᴛᴀɴᴀɴᴄᴇ ʙʏ ᴢᴇʀᴏ ʙᴜɢ ᴢᴏɴᴇ.',
     CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbAUZUeJENy0fOUS5E3J'
+     THARUZZ_FOOTER: "> ©POWERD BY THARUZZ | OFC",
+     THARUZZ_IMAGE_URL: "https://files.catbox.moe/iik6l0.png"
+}
 };
 
 const octokit = new Octokit({
@@ -784,11 +787,6 @@ case 'song': {
 }
 
 //================================ tiktok ==================================
-
-const config = {
-  THARUZZ_FOOTER: "> ©POWERD BY THARUZZ | OFC",
-  THARUZZ_IMAGE_URL: "https://files.catbox.moe/iik6l0.png"
-}
 
 
 // TIK TOK COMMAND
