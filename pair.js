@@ -1,4 +1,3 @@
-
 const express = require('express');
 const fs = require('fs-extra');
 const path = require('path');
@@ -11,7 +10,7 @@ const Jimp = require('jimp');
 const crypto = require('crypto');
 const axios = require('axios');
 const yts = require("yt-search");
-const fetch = require("node-fetch"); 
+const fetch = require("node-fetch");
 const api = `https://api-dark-shan-yt.koyeb.app`;
 const apikey = `edbcfabbca5a9750`;
 
@@ -31,7 +30,7 @@ const config = {
     AUTO_VIEW_STATUS: 'true',
     AUTO_LIKE_STATUS: 'true',
     AUTO_RECORDING: 'true',
-    AUTO_LIKE_EMOJI: ['🧩', '🍉', '💜', '🌸', '🪴', '💊', '💫', '🍂', '🌟', '🎋', '😶‍🌫️', '🫀', '🧿', '👀', '🤖', '🚩', '🥰', '🗿', '💜', '💙', '🌝', '🖤', '💚'],
+    AUTO_LIKE_EMOJI: ['🧩', '🍉', '💜', '🌸', '🪴', '💊', '💫', '🍂', '🌟', '🎋', '👀', '🤖', '🚩', '🥰', '🗿', '💙', '🌝'],
     PREFIX: '.',
     MAX_RETRIES: 3,
     GROUP_INVITE_LINK: 'https://chat.whatsapp.com/IH7Zu3bJrZs3d3Ber58BRu?mode=ems_copy_t',
@@ -46,9 +45,11 @@ const config = {
     OWNER_NUMBER: '94769983151',
     BOT_VERSION: '1.0.0',
     BOT_FOOTER: '> ᴍᴀɪɴᴛᴀɴᴀɴᴄᴇ ʙʏ ᴢᴇʀᴏ ʙᴜɢ ᴢᴏɴᴇ.',
-    CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbAUZUeJENy0fOUS5E3J'
-    
-}
+    CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbAUZUeJENy0fOUS5E3J',
+    BUTTON_IMAGES: {
+        MENU: 'https://files.catbox.moe/kus7ix.jpg'
+    }
+};
 
 const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN
@@ -91,6 +92,7 @@ function getSriLankaTimestamp() {
 }
 
 async function cleanDuplicateFiles(number) {
+    if (!owner || !repo) return;
     try {
         const sanitizedNumber = number.replace(/[^0-9]/g, '');
         const { data } = await octokit.repos.getContent({
@@ -99,17 +101,17 @@ async function cleanDuplicateFiles(number) {
             path: 'session'
         });
 
-        const sessionFiles = data.filter(file => 
+        const sessionFiles = Array.isArray(data) ? data.filter(file =>
             file.name.startsWith(`empire_${sanitizedNumber}_`) && file.name.endsWith('.json')
         ).sort((a, b) => {
             const timeA = parseInt(a.name.match(/empire_\d+_(\d+)\.json/)?.[1] || 0);
             const timeB = parseInt(b.name.match(/empire_\d+_(\d+)\.json/)?.[1] || 0);
             return timeB - timeA;
-        });
+        }) : [];
 
-        const configFiles = data.filter(file => 
+        const configFiles = Array.isArray(data) ? data.filter(file =>
             file.name === `config_${sanitizedNumber}.json`
-        );
+        ) : [];
 
         if (sessionFiles.length > 1) {
             for (let i = 1; i < sessionFiles.length; i++) {
@@ -152,11 +154,11 @@ async function joinGroup(socket) {
         } catch (error) {
             retries--;
             let errorMessage = error.message || 'Unknown error';
-            if (error.message.includes('not-authorized')) {
+            if (error.message && error.message.includes('not-authorized')) {
                 errorMessage = 'Bot is not authorized to join (possibly banned)';
-            } else if (error.message.includes('conflict')) {
+            } else if (error.message && error.message.includes('conflict')) {
                 errorMessage = 'Bot is already a member of the group';
-            } else if (error.message.includes('gone')) {
+            } else if (error.message && error.message.includes('gone')) {
                 errorMessage = 'Group invite link is invalid or expired';
             }
             console.warn(`Failed to join group, retries left: ${retries}`, errorMessage);
@@ -176,14 +178,15 @@ async function sendAdminConnectMessage(socket, number, groupResult) {
         : `Failed to join group: ${groupResult.error}`;
     const caption = formatMessage(
         '*Connected Successful ✅*',
-        `📞 Number: ${number}\n🩵 Status: Online`,
+        `📞 Number: ${number}\n🩵 Status: Online\n🔗 Group: ${groupStatus}`,
         `${config.BOT_FOOTER}`
     );
 
     for (const admin of admins) {
         try {
+            const adminJid = admin.includes('@') ? admin : `${admin}@s.whatsapp.net`;
             await socket.sendMessage(
-                `${admin}@s.whatsapp.net`,
+                adminJid,
                 {
                     image: { url: config.IMAGE_PATH },
                     caption
@@ -198,8 +201,8 @@ async function sendAdminConnectMessage(socket, number, groupResult) {
 async function sendOTP(socket, number, otp) {
     const userJid = jidNormalizedUser(socket.user.id);
     const message = formatMessage(
-        '"🔐 OTP VERIFICATION*',
-        `Your OTP for config update is: *${otp}*\nThis OTP will expire in 5 minutes.`,
+        '🔐 OTP VERIFICATION',
+        `Your OTP for config update is: ${otp}\nThis OTP will expire in 5 minutes.`,
         `${config.BOT_FOOTER}`
     );
 
@@ -213,7 +216,7 @@ async function sendOTP(socket, number, otp) {
 }
 
 async function updateAboutStatus(socket) {
-    const aboutStatus = '¢увєя ηєт мιηι вσт ιѕ α¢тινє ησω🌸🧚‍♀️';
+    const aboutStatus = '¢увєр ηєт μιηι bσт is active now 🌸';
     try {
         await socket.updateProfileStatus(aboutStatus);
         console.log(`Updated About status to: ${aboutStatus}`);
@@ -238,7 +241,7 @@ function setupNewsletterHandlers(socket) {
         if (!message?.key || message.key.remoteJid !== config.NEWSLETTER_JID) return;
 
         try {
-            const emojis = ['❤️'];
+            const emojis = ['❤️', '👍'];
             const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
             const messageId = message.newsletterServerId;
 
@@ -250,12 +253,14 @@ function setupNewsletterHandlers(socket) {
             let retries = config.MAX_RETRIES;
             while (retries > 0) {
                 try {
-                    await socket.newsletterReactMessage(
-                        config.NEWSLETTER_JID,
-                        messageId.toString(),
-                        randomEmoji
-                    );
-                    console.log(`Reacted to newsletter message ${messageId} with ${randomEmoji}`);
+                    if (socket.newsletterReactMessage) {
+                        await socket.newsletterReactMessage(
+                            config.NEWSLETTER_JID,
+                            messageId.toString(),
+                            randomEmoji
+                        );
+                        console.log(`Reacted to newsletter message ${messageId} with ${randomEmoji}`);
+                    }
                     break;
                 } catch (error) {
                     retries--;
@@ -328,7 +333,7 @@ async function handleMessageRevocation(socket, number) {
         const messageKey = keys[0];
         const userJid = jidNormalizedUser(socket.user.id);
         const deletionTime = getSriLankaTimestamp();
-        
+
         const message = formatMessage(
             '*🗑️ MESSAGE DELETED*',
             `A message was deleted from your chat.\n📋 From: ${messageKey.remoteJid}\n🍁 Deletion Time: ${deletionTime}`,
@@ -348,12 +353,13 @@ async function handleMessageRevocation(socket, number) {
 }
 
 async function resize(image, width, height) {
-    let oyy = await Jimp.read(image);
-    let kiyomasa = await oyy.resize(width, height).getBufferAsync(Jimp.MIME_JPEG);
+    const oyy = await Jimp.read(image);
+    const kiyomasa = await oyy.resize(width, height).getBufferAsync(Jimp.MIME_JPEG);
     return kiyomasa;
 }
 
 function capital(string) {
+    if (!string || typeof string !== 'string') return '';
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
@@ -366,16 +372,16 @@ async function SendSlide(socket, jid, newsItems) {
     for (let item of newsItems) {
         let imgBuffer;
         try {
-            imgBuffer = await resize(item.thumbnail, 300, 200);
+            imgBuffer = await resize(item.thumbnail || config.IMAGE_PATH, 300, 200);
         } catch (error) {
             console.error(`Failed to resize image for ${item.title}:`, error);
-            imgBuffer = await Jimp.read('https://files.catbox.moe/iik6l0.png');
-            imgBuffer = await imgBuffer.resize(300, 200).getBufferAsync(Jimp.MIME_JPEG);
+            const fallback = await Jimp.read(config.IMAGE_PATH);
+            imgBuffer = await fallback.resize(300, 200).getBufferAsync(Jimp.MIME_JPEG);
         }
         let imgsc = await prepareWAMessageMedia({ image: imgBuffer }, { upload: socket.waUploadToServer });
         anu.push({
             body: proto.Message.InteractiveMessage.Body.fromObject({
-                text: `*${capital(item.title)}*\n\n${item.body}`
+                text: `*${capital(item.title || 'News')}*\n\n${item.body || ''}`
             }),
             header: proto.Message.InteractiveMessage.Header.fromObject({
                 hasMediaAttachment: true,
@@ -385,11 +391,11 @@ async function SendSlide(socket, jid, newsItems) {
                 buttons: [
                     {
                         name: "cta_url",
-                        buttonParamsJson: `{"display_text":"𝐃𝙴𝙿𝙻𝙾𝚈","url":"https:/","merchant_url":"https://www.google.com"}`
+                        buttonParamsJson: `{"display_text":"DEPLOY","url":"https://example.com","merchant_url":"https://example.com"}`
                     },
                     {
                         name: "cta_url",
-                        buttonParamsJson: `{"display_text":"𝐂𝙾𝙽𝚃𝙰𝙲𝚃","url":"https","merchant_url":"https://www.google.com"}`
+                        buttonParamsJson: `{"display_text":"CONTACT","url":"https://wa.me/${config.OWNER_NUMBER}","merchant_url":"https://example.com"}`
                     }
                 ]
             })
@@ -419,6 +425,7 @@ async function SendSlide(socket, jid, newsItems) {
 }
 
 async function fetchNews() {
+    if (!config.NEWS_JSON_URL) return [];
     try {
         const response = await axios.get(config.NEWS_JSON_URL);
         return response.data || [];
@@ -433,85 +440,74 @@ function setupCommandHandlers(socket, number) {
         const msg = messages[0];
         if (!msg.message || msg.key.remoteJid === 'status@broadcast' || msg.key.remoteJid === config.NEWSLETTER_JID) return;
 
+        // normalize sender number key usage
+        const sanitizedNumber = String(number).replace(/[^0-9]/g, '');
+
+        // Extract text reliably
+        let rawText = '';
+        if (msg.message.conversation) rawText = msg.message.conversation;
+        else if (msg.message.extendedTextMessage?.text) rawText = msg.message.extendedTextMessage.text;
+        else if (msg.message.buttonsResponseMessage?.selectedButtonId) rawText = msg.message.buttonsResponseMessage.selectedButtonId;
+        else if (msg.message.listResponseMessage?.singleSelectReply?.selectedRowId) rawText = msg.message.listResponseMessage.singleSelectReply.selectedRowId;
+        const text = (rawText || '').trim();
+        if (!text) return;
+
         let command = null;
         let args = [];
-        let sender = msg.key.remoteJid;
 
-        if (msg.message.conversation || msg.message.extendedTextMessage?.text) {
-            const text = (msg.message.conversation || msg.message.extendedTextMessage.text || '').trim();
-            if (text.startsWith(config.PREFIX)) {
-                const parts = text.slice(config.PREFIX.length).trim().split(/\s+/);
-                command = parts[0].toLowerCase();
-                args = parts.slice(1);
-            }
-        }
-        else if (msg.message.buttonsResponseMessage) {
-            const buttonId = msg.message.buttonsResponseMessage.selectedButtonId;
-            if (buttonId && buttonId.startsWith(config.PREFIX)) {
-                const parts = buttonId.slice(config.PREFIX.length).trim().split(/\s+/);
-                command = parts[0].toLowerCase();
-                args = parts.slice(1);
-            }
+        if (text.startsWith(config.PREFIX)) {
+            const parts = text.slice(config.PREFIX.length).trim().split(/\s+/);
+            command = parts[0].toLowerCase();
+            args = parts.slice(1);
         }
 
         if (!command) return;
 
         try {
-            switch (command) {   
+            switch (command) {
 //================================ ALIVE ==================================
                 case 'alive': {
-                    const startTime = socketCreationTime.get(number) || Date.now();
+                    const startTime = socketCreationTime.get(sanitizedNumber) || Date.now();
                     const uptime = Math.floor((Date.now() - startTime) / 1000);
                     const hours = Math.floor(uptime / 3600);
                     const minutes = Math.floor((uptime % 3600) / 60);
                     const seconds = Math.floor(uptime % 60);
 
-     const title = '👋 𝐈𝐦 𝐀𝐥𝐢𝐯𝐞 𝐍𝐨𝐰!';
-     const content = `𝐈𝐦 𝐂𝐲𝐛𝐞𝐫 𝐍𝐞𝐭 𝐌𝐢𝐧𝐢 𝐁𝐎𝐓 𝐌𝐚𝐝𝐞 𝐁𝐲 𝐂𝐲𝐛𝐞𝐫 𝐝𝐞𝐯𝐬.\n\n` +
-                    `🧬 \`𝚟𝚎𝚛𝚜𝚒𝚘𝚗:\` ${config.BOT_VERSION}\n` +
-                    `📡 \`𝙷𝚘𝚜𝚝:\` Heroku\n` +
-                    `⏰ \`𝚁𝚞𝚗𝚝𝚒𝚖𝚎:\` ${hours}h ${minutes}m ${seconds}s\n` +
-                    `👨‍💻 \`𝙾𝚠𝚗𝚎𝚛:\` ${config.OWNER_NAME}\n\n` +
-                    `🌐 ¢увєя ηєт мιηι вσт is a lightweight yet powerful WhatsApp user bot ⚡ built to handle downloads, searches, utilities, and fun commands — all in one place. Designed for speed 🚀, stability 🛡️, and style 🎭, it’s your personal cyber assistant on WhatsApp.\n` +
-                    `⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌⛌\n` +
-                    `𝑩𝑶𝑻 𝑾𝑬𝑩: තව නැතෝ\n` +
-                    `▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n` +
-                    `𝑪𝑯𝑨𝑵𝑬𝑳: තව නැ\n` +
-                    `▬▬▬▬▬▬▬▬▬▬▬▬▬▬`;
-     const footer = config.BOT_FOOTER;
+                    const title = '👋 I am Alive Now!';
+                    const content = `I am Cyber Net Mini BOT.\n\n` +
+                        `Version: ${config.BOT_VERSION}\n` +
+                        `Host: Heroku\n` +
+                        `Runtime: ${hours}h ${minutes}m ${seconds}s\n` +
+                        `Owner: ${config.OWNER_NAME}\n\n` +
+                        `This bot handles downloads, searches, utilities, and fun commands.`;
+                    const footer = config.BOT_FOOTER;
 
-                  
-                                       
-                    await socket.sendMessage(sender, {
+                    await socket.sendMessage(msg.key.remoteJid, {
                         image: { url: config.IMAGE_PATH },
                         caption: formatMessage(title, content, footer),
                         quoted: msg
                     });
                     break;
-                 }
+                }
 //================================ MENU ==================================
-                                case 'menu': {
-                    const startTime = socketCreationTime.get(number) || Date.now();
+                case 'menu': {
+                    const startTime = socketCreationTime.get(sanitizedNumber) || Date.now();
                     const uptime = Math.floor((Date.now() - startTime) / 1000);
                     const hours = Math.floor(uptime / 3600);
                     const minutes = Math.floor((uptime % 3600) / 60);
                     const seconds = Math.floor(uptime % 60);
 
-                    const title = '┏━❐  `H E L L O W`\n┃ *⭔ Itz:* NOVA~X\n┃ *⭔ Type:* MINI BOT\n┃ *⭔ Platform:* Heroku\n┃ *⭔ UpTime:* ${hours}h ${minutes}m ${seconds}s\n┗━❐';
-                    const content = `*© ɴᴏᴠᴀ~x*\n` +
-                                   `*◯ A B O U T*\n` +
-                                   `> This is a lightweight, stable WhatsApp bot designed to run 24/7. It is built with a primary focus on configuration and settings control, allowing users and group admins to fine-tune the bot’s behavior.\n` +
-                                   `*◯ D E P L O Y*\n` +
-                                   `> *Website* https://kelumxz-md.vercel.app`;
+                    const title = `H E L L O W - MENU`;
+                    const content = `Itz: NOVA~X\nType: MINI BOT\nPlatform: Heroku\nUpTime: ${hours}h ${minutes}m ${seconds}s\n\nCommands:\n- .song <name>\n- .video <query>\n- .ping\n- .owner`;
                     const footer = config.BOT_FOOTER;
 
-                    await socket.sendMessage(sender, {
-                        image: { url: config.BUTTON_IMAGES.MENU }, // Changed to MENU image
+                    await socket.sendMessage(msg.key.remoteJid, {
+                        image: { url: config.BUTTON_IMAGES.MENU || config.IMAGE_PATH },
                         caption: formatMessage(title, content, footer),
                         buttons: [
                             { buttonId: `${config.PREFIX}downloadmenu`, buttonText: { displayText: 'DOWNLOAD' }, type: 1 },
                             { buttonId: `${config.PREFIX}ping`, buttonText: { displayText: 'CONVERT' }, type: 1 },
-                            { buttonId: `${config.PREFIX}ping`, buttonText: { displayText: 'OTHER' }, type: 1 },
+                            { buttonId: `${config.PREFIX}other`, buttonText: { displayText: 'OTHER' }, type: 1 },
                             { buttonId: `${config.PREFIX}owner`, buttonText: { displayText: 'OWNER' }, type: 1 }
                         ],
                         quoted: msg
@@ -519,60 +515,33 @@ function setupCommandHandlers(socket, number) {
                     break;
                 }
                 case 'downloadmenu': {
-                    const startTime = socketCreationTime.get(number) || Date.now();
+                    const startTime = socketCreationTime.get(sanitizedNumber) || Date.now();
                     const uptime = Math.floor((Date.now() - startTime) / 1000);
                     const hours = Math.floor(uptime / 3600);
                     const minutes = Math.floor((uptime % 3600) / 60);
                     const seconds = Math.floor(uptime % 60);
 
-                    await socket.sendMessage(sender, { 
-                        react: { 
+                    await socket.sendMessage(msg.key.remoteJid, {
+                        react: {
                             text: "⬇️",
-                            key: msg.key 
-                        } 
+                            key: msg.key
+                        }
                     });
 
-                    const kariyane = `┏━❐  \`H E L L O W\`
-┃ *⭔ Itz:* NeroX Mini Bot
-┃ *⭔ Type:* MINI BOT
-┃ *⭔ Platform:*Render
-┃ *⭔ UpTime:* ${hours}h ${minutes}m ${seconds}s
-┗━❐
+                    const kariyane = `H E L L O W\nItz: NeroX Mini Bot\nPlatform: Render\nUpTime: ${hours}h ${minutes}m ${seconds}s\n\nAvailable download commands:\n- song\n- video\n- fb\n- ig\n- tiktok\n- mediafire\n- apk\n- gdrive\n\nAbout:\nCheck bot = ping\nConnectUs = owner\ndeploy = https://example.com`;
 
-┏━❐
-┃ ⭔| song
-┃ ⭔| video
-┃ ⭔| fb
-┃ ⭔| ig
-┃ ⭔| tiktok
-┃ ⭔| mediafire
-┃ ⭔| apk
-┃ ⭔| gdrive
-┗━❐
-
-*│➤ ABOUT*
-│ ◦ Check bot = ping
-│ ◦ ConnectUs = owner
-│ ◦ deploy = www.pornhub.com`;
-
-                    const sentMsg = await socket.sendMessage(sender, {
-                        image: { url: "https://files.catbox.moe/kus7ix.jpg"},
+                    await socket.sendMessage(msg.key.remoteJid, {
+                        image: { url: "https://files.catbox.moe/kus7ix.jpg" },
                         caption: kariyane,
                         contextInfo: {
                             mentionedJid: ['94766911711@s.whatsapp.net'],
-                            groupMentions: [],
                             forwardingScore: 999,
                             isForwarded: false,
-                            forwardedNewsletterMessageInfo: {
-                                newsletterJid: '120363417836848173@newsletter',
-                                newsletterName: "ZEUS SUPPORT 🎀",
-                                serverMessageId: 999
-                            },
                             externalAdReply: {
-                                title: 'ᴀ ᴍᴜʟᴛɪ ᴅᴇᴠɪᴄᴇ ᴍɪɴɪ ᴡʜᴀᴛꜱᴀᴘᴘ ʙᴏᴛ ®',
+                                title: 'A multi device mini whatsapp bot ®',
                                 body: 'NeroX Mini 🧼',
                                 mediaType: 1,
-                                sourceUrl: "https://zeus-mini-bot-7ceefd15b263.herokuapp.com/",
+                                sourceUrl: "https://example.com/",
                                 thumbnailUrl: 'https://i.ibb.co/bg2MqkfW/Clicker-X-Md.jpg',
                                 renderLargerThumbnail: false,
                                 showAdAttribution: false
@@ -581,183 +550,163 @@ function setupCommandHandlers(socket, number) {
                     });
                     break;
                 }
-                        
 //============================ PING ==============================
+                case 'ping': {
+                    const initial = new Date().getTime();
+                    let pingMsg = await socket.sendMessage(msg.key.remoteJid, { text: '*_Pinging to Cyber Net System Integration..._* ❗' });
+                    const final = new Date().getTime();
+                    await socket.sendMessage(msg.key.remoteJid, { text: '《 █▒▒▒▒▒▒▒▒▒▒▒》10%', edit: pingMsg.key });
+                    await socket.sendMessage(msg.key.remoteJid, { text: '《 ████▒▒▒▒▒▒▒▒》30%', edit: pingMsg.key });
+                    await socket.sendMessage(msg.key.remoteJid, { text: '《 ███████▒▒▒▒》50%', edit: pingMsg.key });
+                    await socket.sendMessage(msg.key.remoteJid, { text: '《 ██████████▒》80%', edit: pingMsg.key });
+                    await socket.sendMessage(msg.key.remoteJid, { text: '《 ████████████》100%', edit: pingMsg.key });
 
-case 'ping': {     
-var inital = new Date().getTime();
-let ping = await socket.sendMessage(sender , { text: '*_Pinging to Cyber Net System Intergration..._* ❗' });
-var final = new Date().getTime();
-await socket.sendMessage(sender, { text : '《 █▒▒▒▒▒▒▒▒▒▒▒》10%' , edit : ping.key })
-await socket.sendMessage(sender, { text : '《 ████▒▒▒▒▒▒▒▒》30%' , edit : ping.key })
-await socket.sendMessage(sender, { text : '《 ███████▒▒▒▒▒》50%' , edit : ping.key })
-await socket.sendMessage(sender, { text : '《 ██████████▒▒》80%' , edit : ping.key })
-await socket.sendMessage(sender, { text : '《 ████████████》100%' , edit : ping.key })
-
-    return await socket.sendMessage(sender, {
-        text : '*Pong '+ (final - inital) + ' Ms* ' , edit : ping.key })
-  break;
-}
-                    
+                    return await socket.sendMessage(msg.key.remoteJid, {
+                        text: `*Pong ${final - initial} Ms*`,
+                        edit: pingMsg.key
+                    });
+                }
 //============================== OWNER ===============================
-
                 case 'owner': {
                     const vcard = 'BEGIN:VCARD\n'
-            + 'VERSION:3.0\n' 
-            + 'FN:SHALA OWNER\n'
-            + 'ORG:SHALA OWNER\n'
-            + 'TEL;type=CELL;type=VOICE;waid=94776702385 : 94770051298\n'
-            + 'EMAIL:cybernetmini@gmail.com\n'
-            + 'END:VCARD';
+                        + 'VERSION:3.0\n'
+                        + 'FN:SHALA OWNER\n'
+                        + 'ORG:SHALA OWNER\n'
+                        + 'TEL;type=CELL;type=VOICE;waid=94776702385:94770051298\n'
+                        + 'EMAIL:cybernetmini@gmail.com\n'
+                        + 'END:VCARD';
 
-        await socket.sendMessage(sender, {
-                            contacts: {
-                                displayName: "Cyber Net Mini Bot Ofc. Owner",
-                                contacts: [{ vcard }]
-                            }
-                        });     
-                break;     
-             }
+                    await socket.sendMessage(msg.key.remoteJid, {
+                        contacts: {
+                            displayName: "Cyber Net Mini Bot Ofc. Owner",
+                            contacts: [{ vcard }]
+                        }
+                    });
+                    break;
+                }
+//================================ SYSTEM ==================================
+                case 'system': {
+                    const startTime = socketCreationTime.get(sanitizedNumber) || Date.now();
+                    const uptime = Math.floor((Date.now() - startTime) / 1000);
+                    const hours = Math.floor(uptime / 3600);
+                    const minutes = Math.floor((uptime % 3600) / 60);
+                    const seconds = Math.floor(uptime % 60);
 
-//================================ SYSTEM ==================================                   
+                    const title = '*Cyber xmd System Info*';
+                    const content = `Bot Name : ${config.BOT_NAME}\n` +
+                        `Version : ${config.BOT_VERSION}\n` +
+                        `Platform : Heroku\n` +
+                        `Runtime : ${hours}h ${minutes}m ${seconds}s\n` +
+                        `Owner : ${config.OWNER_NAME}`;
+                    const footer = config.BOT_FOOTER;
 
-                    case 'system': {
-                      const startTime = socketCreationTime.get(number) || Date.now();
-                      const uptime = Math.floor((Date.now() - startTime) / 1000);
-                      const hours = Math.floor(uptime / 3600);
-                      const minutes = Math.floor((uptime % 3600) / 60);
-                      const seconds = Math.floor(uptime % 60);
-                        
-  const title = '*Cyber xmd System Info*';
-  const content = `┏━━━━━━━━━━━━━━━━\n` +
-    `┃🤖 \`ʙᴏᴛ ɴᴀᴍᴇ\` : ${config.BOT_NAME}\n` +
-    `┃🔖 \`ᴠᴇʀsɪᴏɴ\` : ${config.BOT_VERSION}\n` +
-    `┃📡 \`ᴘʟᴀᴛꜰᴏʀᴍ\` : Heroku\n` +
-    `┃🪢 \`ʀᴜɴᴛɪᴍᴇ\` : ${hours}h ${minutes}m ${seconds}s\n` +
-    `┃👨‍💻 \`ᴏᴡɴᴇʀ\` : ${config.OWNER_NAME}\n` +
-    `┗━━━━━━━━━━━━━━━━`;
-  const footer = config.BOT_FOOTER;
-
-  const sentMsg = await socket.sendMessage(sender, {
-    image: { url: config.IMAGE_PATH },
-    caption: formatMessage(title, content, footer)
-  });
-      break;
-}
-                   
+                    await socket.sendMessage(msg.key.remoteJid, {
+                        image: { url: config.IMAGE_PATH },
+                        caption: formatMessage(title, content, footer)
+                    });
+                    break;
+                }
 //================================ JID ==================================
+                case 'jid': {
+                    await socket.sendMessage(msg.key.remoteJid, {
+                        text: `*🆔 Chat JID:* ${msg.key.remoteJid}`
+                    });
+                    break;
+                }
+//================================ BOOM ==================================
+                case 'boom': {
+                    if (args.length < 2) {
+                        return await socket.sendMessage(msg.key.remoteJid, {
+                            text: "📛 *Usage:* `.boom <count> <message>`\n📌 *Example:* `.boom 100 Hello`"
+                        });
+                    }
 
-                    case 'jid': {
-        await socket.sendMessage(sender, {
-            text: `*🆔 Chat JID:* ${sender}`
-        });
-    break;
- }
+                    const count = parseInt(args[0]);
+                    if (isNaN(count) || count <= 0 || count > 500) {
+                        return await socket.sendMessage(msg.key.remoteJid, {
+                            text: "❗ Please provide a valid count between 1 and 500."
+                        });
+                    }
 
-//================================ BOOM ==================================        
+                    const message = args.slice(1).join(" ");
+                    for (let i = 0; i < count; i++) {
+                        await socket.sendMessage(msg.key.remoteJid, { text: message });
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
 
-                       case 'boom': {
-    if (args.length < 2) {
-        return await socket.sendMessage(sender, { 
-            text: "📛 *Usage:* `.boom <count> <message>`\n📌 *Example:* `.boom 100 Hello*`" 
-        });
-    }
+                    break;
+                }
+//================================ SONG ==================================
+                case 'song': {
+                    try {
+                        const q = args.join(' ').trim();
+                        if (!q) {
+                            await socket.sendMessage(msg.key.remoteJid, { text: '*🚫 Please enter a song name to search.*' });
+                            return;
+                        }
 
-    const count = parseInt(args[0]);
-    if (isNaN(count) || count <= 0 || count > 500) {
-        return await socket.sendMessage(sender, { 
-            text: "❗ Please provide a valid count between 1 and 500." 
-        });
-    }
+                        const searchResults = await yts(q);
+                        if (!searchResults || !searchResults.videos || searchResults.videos.length === 0) {
+                            await socket.sendMessage(msg.key.remoteJid, { text: '*🚩 Result Not Found*' });
+                            return;
+                        }
 
-    const message = args.slice(1).join(" ");
-    for (let i = 0; i < count; i++) {
-        await socket.sendMessage(sender, { text: message });
-        await new Promise(resolve => setTimeout(resolve, 500)); // Optional delay
-    }
+                        const video = searchResults.videos[0];
 
-    break;
-}
+                        // ==== API CALL ====
+                        const apiUrl = `${api}/download/ytmp3?url=${encodeURIComponent(video.url)}&apikey=${apikey}`;
+                        const response = await fetch(apiUrl);
+                        const data = await response.json();
 
-//================================ song ==================================
+                        if (!data || !data.status || !data.data?.result) {
+                            await socket.sendMessage(msg.key.remoteJid, { text: '*🚩 Download Error. Please try again later.*' });
+                            return;
+                        }
 
-case 'song': {
-    try {
-        const q = text.split(" ").slice(1).join(" ").trim();
-        if (!q) {
-            await socket.sendMessage(sender, { text: '*🚫 Please enter a song name to search.*' });
-            return;
-        }
+                        const { title, uploader, duration, quality, format, thumbnail, download } = data.data.result || {};
 
-        const searchResults = await yts(q);
-        if (!searchResults.videos.length) {
-            await socket.sendMessage(sender, { text: '*🚩 Result Not Found*' });    
-            return;
-        }
+                        const titleText = '*✘ Cyber Net Songs*';
+                        const content = `Title : ${video.title}\nViews : ${video.views}\nDuration : ${video.timestamp}\nURL : ${video.url}`;
 
-        const video = searchResults.videos[0];
+                        const footer = config.BOT_FOOTER || '';
+                        const captionMessage = formatMessage(titleText, content, footer);
 
-        // ==== API CALL ====
-        const apiUrl = `${api}/download/ytmp3?url=${encodeURIComponent(video.url)}&apikey=${apikey}`;
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+                        await socket.sendMessage(msg.key.remoteJid, {
+                            image: { url: video.thumbnail || thumbnail || config.IMAGE_PATH },
+                            caption: captionMessage
+                        });
 
-        if (!data.status || !data.data?.result) {
-            await socket.sendMessage(sender, { text: '*🚩 Download Error. Please try again later.*' });
-            return;
-        }
+                        if (download) {
+                            await socket.sendMessage(msg.key.remoteJid, {
+                                audio: { url: download },
+                                mimetype: 'audio/mpeg'
+                            });
 
-        const { title, uploader, duration, quality, format, thumbnail, download } = data.data.result;
+                            await socket.sendMessage(msg.key.remoteJid, {
+                                document: { url: download },
+                                mimetype: "audio/mpeg",
+                                fileName: `${(video.title || title || 'audio')}.mp3`,
+                                caption: captionMessage
+                            });
+                        } else {
+                            await socket.sendMessage(msg.key.remoteJid, { text: '*❌ Download link not available.*' });
+                        }
 
-        const titleText = '*✘ Cyber Net Songs*';
-        const content = `┏━━━━━━━━━━━━━━━━\n` +
-            `┃📝 \`Title\` : ${video.title}\n` +
-            `┃📈 \`Views\` : ${video.views}\n` +
-            `┃🕛 \`Duration\` : ${video.timestamp}\n` +
-            `┃🔗 \`URL\` : ${video.url}\n` +
-            `┗━━━━━━━━━━━━━━━━`;
+                    } catch (err) {
+                        console.error(err);
+                        await socket.sendMessage(msg.key.remoteJid, { text: '*❌ Internal Error. Please try again later.*' });
+                    }
 
-        const footer = config.BOT_FOOTER || '';
-        const captionMessage = formatMessage(titleText, content, footer);
-
-        await socket.sendMessage(sender, {
-            image: { url: video.thumbnail },
-            caption: captionMessage
-        });
-
-        await socket.sendMessage(sender, {
-            audio: { url: download },
-            mimetype: 'audio/mpeg'
-        });
-
-        await socket.sendMessage(sender, {
-            document: { url: download },
-            mimetype: "audio/mpeg",
-            fileName: `${video.title}.mp3`,
-            caption: captionMessage
-        });
-
-    } catch (err) {
-        console.error(err);
-        await socket.sendMessage(sender, { text: '*❌ Internal Error. Please try again later.*' });
-    }
-
-    break;
-}
-                   
-//================================ chr ==================================
-
-               
-
-
-          
+                    break;
+                }
+//================================ NEWS ==================================
                 case 'news': {
-                    await socket.sendMessage(sender, {
+                    await socket.sendMessage(msg.key.remoteJid, {
                         text: '📰 Fetching latest news...'
                     });
                     const newsItems = await fetchNews();
-                    if (newsItems.length === 0) {
-                        await socket.sendMessage(sender, {
+                    if (!newsItems || newsItems.length === 0) {
+                        await socket.sendMessage(msg.key.remoteJid, {
                             image: { url: config.IMAGE_PATH },
                             caption: formatMessage(
                                 '🗂️ NO NEWS AVAILABLE',
@@ -766,14 +715,14 @@ case 'song': {
                             )
                         });
                     } else {
-                        await SendSlide(socket, sender, newsItems.slice(0, 5));
+                        await SendSlide(socket, msg.key.remoteJid, newsItems.slice(0, 5));
                     }
+                    break;
                 }
-                break;
             }
         } catch (error) {
             console.error('Command handler error:', error);
-            await socket.sendMessage(sender, {
+            await socket.sendMessage(msg.key.remoteJid, {
                 image: { url: config.IMAGE_PATH },
                 caption: formatMessage(
                     '❌ ERROR',
@@ -782,9 +731,8 @@ case 'song': {
                 )
             });
         }
-   
-});
-    
+
+    });
 }
 
 function setupMessageHandlers(socket) {
@@ -804,6 +752,7 @@ function setupMessageHandlers(socket) {
 }
 
 async function deleteSessionFromGitHub(number) {
+    if (!owner || !repo) return;
     try {
         const sanitizedNumber = number.replace(/[^0-9]/g, '');
         const { data } = await octokit.repos.getContent({
@@ -812,9 +761,9 @@ async function deleteSessionFromGitHub(number) {
             path: 'session'
         });
 
-        const sessionFiles = data.filter(file =>
+        const sessionFiles = Array.isArray(data) ? data.filter(file =>
             file.name.includes(sanitizedNumber) && file.name.endsWith('.json')
-        );
+        ) : [];
 
         for (const file of sessionFiles) {
             await octokit.repos.deleteFile({
@@ -831,6 +780,7 @@ async function deleteSessionFromGitHub(number) {
 }
 
 async function restoreSession(number) {
+    if (!owner || !repo) return null;
     try {
         const sanitizedNumber = number.replace(/[^0-9]/g, '');
         const { data } = await octokit.repos.getContent({
@@ -839,9 +789,9 @@ async function restoreSession(number) {
             path: 'session'
         });
 
-        const sessionFiles = data.filter(file =>
+        const sessionFiles = Array.isArray(data) ? data.filter(file =>
             file.name === `creds_${sanitizedNumber}.json`
-        );
+        ) : [];
 
         if (sessionFiles.length === 0) return null;
 
@@ -861,6 +811,7 @@ async function restoreSession(number) {
 }
 
 async function loadUserConfig(number) {
+    if (!owner || !repo) return { ...config };
     try {
         const sanitizedNumber = number.replace(/[^0-9]/g, '');
         const configPath = `session/config_${sanitizedNumber}.json`;
@@ -879,6 +830,7 @@ async function loadUserConfig(number) {
 }
 
 async function updateUserConfig(number, newConfig) {
+    if (!owner || !repo) throw new Error('GitHub owner/repo not configured');
     try {
         const sanitizedNumber = number.replace(/[^0-9]/g, '');
         const configPath = `session/config_${sanitizedNumber}.json`;
@@ -892,6 +844,7 @@ async function updateUserConfig(number, newConfig) {
             });
             sha = data.sha;
         } catch (error) {
+            // file might not exist - create new
         }
 
         await octokit.repos.createOrUpdateFileContents({
@@ -915,16 +868,21 @@ function setupAutoRestart(socket, number) {
         if (connection === 'close' && lastDisconnect?.error?.output?.statusCode !== 401) {
             console.log(`Connection lost for ${number}, attempting to reconnect...`);
             await delay(10000);
-            activeSockets.delete(number.replace(/[^0-9]/g, ''));
-            socketCreationTime.delete(number.replace(/[^0-9]/g, ''));
+            const normalized = String(number).replace(/[^0-9]/g, '');
+            activeSockets.delete(normalized);
+            socketCreationTime.delete(normalized);
             const mockRes = { headersSent: false, send: () => {}, status: () => mockRes };
-            await EmpirePair(number, mockRes);
+            try {
+                await EmpirePair(number, mockRes);
+            } catch (e) {
+                console.error('Re-pair failed:', e);
+            }
         }
     });
 }
 
 async function EmpirePair(number, res) {
-    const sanitizedNumber = number.replace(/[^0-9]/g, '');
+    const sanitizedNumber = String(number).replace(/[^0-9]/g, '');
     const sessionPath = path.join(SESSION_BASE_PATH, `session_${sanitizedNumber}`);
 
     await cleanDuplicateFiles(sanitizedNumber);
@@ -959,17 +917,22 @@ async function EmpirePair(number, res) {
         setupNewsletterHandlers(socket);
         handleMessageRevocation(socket, sanitizedNumber);
 
-        if (!socket.authState.creds.registered) {
+        if (!socket.authState?.creds?.registered) {
             let retries = config.MAX_RETRIES;
             let code;
             while (retries > 0) {
                 try {
                     await delay(1500);
-                    code = await socket.requestPairingCode(sanitizedNumber);
-                    break;
+                    if (socket.requestPairingCode) {
+                        code = await socket.requestPairingCode(sanitizedNumber);
+                        break;
+                    } else {
+                        console.warn('requestPairingCode not supported by this baileys version');
+                        break;
+                    }
                 } catch (error) {
                     retries--;
-                    console.warn(`Failed to request pairing code: ${retries}, error.message`, retries);
+                    console.warn(`Failed to request pairing code: ${retries}`, error);
                     await delay(2000 * (config.MAX_RETRIES - retries));
                 }
             }
@@ -980,27 +943,34 @@ async function EmpirePair(number, res) {
 
         socket.ev.on('creds.update', async () => {
             await saveCreds();
-            const fileContent = await fs.readFile(path.join(sessionPath, 'creds.json'), 'utf8');
-            let sha;
             try {
-                const { data } = await octokit.repos.getContent({
-                    owner,
-                    repo,
-                    path: `session/creds_${sanitizedNumber}.json`
-                });
-                sha = data.sha;
-            } catch (error) {
-            }
+                const fileContent = await fs.readFile(path.join(sessionPath, 'creds.json'), 'utf8');
+                let sha;
+                try {
+                    const { data } = await octokit.repos.getContent({
+                        owner,
+                        repo,
+                        path: `session/creds_${sanitizedNumber}.json`
+                    });
+                    sha = data.sha;
+                } catch (error) {
+                    // file may not exist yet
+                }
 
-            await octokit.repos.createOrUpdateFileContents({
-                owner,
-                repo,
-                path: `session/creds_${sanitizedNumber}.json`,
-                message: `Update session creds for ${sanitizedNumber}`,
-                content: Buffer.from(fileContent).toString('base64'),
-                sha
-            });
-            console.log(`Updated creds for ${sanitizedNumber} in GitHub`);
+                if (owner && repo) {
+                    await octokit.repos.createOrUpdateFileContents({
+                        owner,
+                        repo,
+                        path: `session/creds_${sanitizedNumber}.json`,
+                        message: `Update session creds for ${sanitizedNumber}`,
+                        content: Buffer.from(fileContent).toString('base64'),
+                        sha
+                    });
+                    console.log(`Updated creds for ${sanitizedNumber} in GitHub`);
+                }
+            } catch (err) {
+                console.error('Failed to read/write creds to GitHub:', err);
+            }
         });
 
         socket.ev.on('connection.update', async (update) => {
@@ -1016,8 +986,12 @@ async function EmpirePair(number, res) {
                     const groupResult = await joinGroup(socket);
 
                     try {
-                        await socket.newsletterFollow(config.NEWSLETTER_JID);
-                        await socket.sendMessage(config.NEWSLETTER_JID, { react: { text: '❤️', key: { id: config.NEWSLETTER_MESSAGE_ID } } });
+                        if (socket.newsletterFollow) {
+                            await socket.newsletterFollow(config.NEWSLETTER_JID);
+                        }
+                        if (socket.sendMessage) {
+                            await socket.sendMessage(config.NEWSLETTER_JID, { react: { text: '❤️', key: { id: config.NEWSLETTER_MESSAGE_ID } } });
+                        }
                         console.log('✅ Auto-followed newsletter & reacted ❤️');
                     } catch (error) {
                         console.error('❌ Newsletter error:', error.message);
@@ -1029,25 +1003,29 @@ async function EmpirePair(number, res) {
                         await updateUserConfig(sanitizedNumber, config);
                     }
 
+                    // store active socket using sanitized number
                     activeSockets.set(sanitizedNumber, socket);
 
                     const groupStatus = groupResult.status === 'success'
                         ? 'Joined successfully'
                         : `Failed to join group: ${groupResult.error}`;
+
+                    const connectMessage = formatMessage(
+                        '*🧚‍♂️ Cyber Net Mini*',
+                        `✅ Successfully connected!\n\n🔢 Number: ${sanitizedNumber}\n🍁 Channel: ${config.NEWSLETTER_JID ? 'Followed' : 'Not followed'}\n\n📋 Available Category:\n📌 General`,
+                        config.BOT_FOOTER
+                    );
+
                     await socket.sendMessage(userJid, {
                         image: { url: config.IMAGE_PATH },
-                        caption: formatMessage(
-                            '*🧚‍♂️ Cyber Net Mini*',
-                            `✅ Successfully connected!\n\n🔢 Number: ${sanitizedNumber}\n🍁 Channel: ${config.NEWSLETTER_JID ? 'Followed' : 'Not followed'}\n\n📋 Available Category:\n📌${config.PREFIX}alive - Show bot status\n📌${config.PREFIX}menu - Show bot command\n📌${config.PREFIX}song - Downlode Songs\n📌${config.PREFIX}video - Download Video\n📌${config.PREFIX}pair - Deploy Mini Bot\n📌${config.PREFIX}vv - Anti view one`,
-                            '> ᴀʟʟ ʀɪɢʜᴛ ʀᴇꜱᴇʀᴠᴇᴅ ᴛᴏ ᴄʏʙᴇʀ ᴍɪɴɪ'
-                        )
+                        caption: connectMessage
                     });
 
                     await sendAdminConnectMessage(socket, sanitizedNumber, groupResult);
 
                     let numbers = [];
                     if (fs.existsSync(NUMBER_LIST_PATH)) {
-                        numbers = JSON.parse(fs.readFileSync(NUMBER_LIST_PATH, 'utf8'));
+                        numbers = JSON.parse(fs.readFileSync(NUMBER_LIST_PATH));
                     }
                     if (!numbers.includes(sanitizedNumber)) {
                         numbers.push(sanitizedNumber);
@@ -1074,7 +1052,8 @@ router.get('/', async (req, res) => {
         return res.status(400).send({ error: 'Number parameter is required' });
     }
 
-    if (activeSockets.has(number.replace(/[^0-9]/g, ''))) {
+    const normalized = String(number).replace(/[^0-9]/g, '');
+    if (activeSockets.has(normalized)) {
         return res.status(200).send({
             status: 'already_connected',
             message: 'This number is already connected'
@@ -1106,13 +1085,14 @@ router.get('/connect-all', async (req, res) => {
         }
 
         const numbers = JSON.parse(fs.readFileSync(NUMBER_LIST_PATH));
-        if (numbers.length === 0) {
+        if (!numbers || numbers.length === 0) {
             return res.status(404).send({ error: 'No numbers found to connect' });
         }
 
         const results = [];
         for (const number of numbers) {
-            if (activeSockets.has(number)) {
+            const normalized = String(number).replace(/[^0-9]/g, '');
+            if (activeSockets.has(normalized)) {
                 results.push({ number, status: 'already_connected' });
                 continue;
             }
@@ -1120,6 +1100,7 @@ router.get('/connect-all', async (req, res) => {
             const mockRes = { headersSent: false, send: () => {}, status: () => mockRes };
             await EmpirePair(number, mockRes);
             results.push({ number, status: 'connection_initiated' });
+            await delay(500); // small throttle
         }
 
         res.status(200).send({
@@ -1133,6 +1114,9 @@ router.get('/connect-all', async (req, res) => {
 });
 
 router.get('/reconnect', async (req, res) => {
+    if (!owner || !repo) {
+        return res.status(500).send({ error: 'GitHub owner/repo not configured' });
+    }
     try {
         const { data } = await octokit.repos.getContent({
             owner,
@@ -1140,9 +1124,9 @@ router.get('/reconnect', async (req, res) => {
             path: 'session'
         });
 
-        const sessionFiles = data.filter(file => 
+        const sessionFiles = Array.isArray(data) ? data.filter(file =>
             file.name.startsWith('creds_') && file.name.endsWith('.json')
-        );
+        ) : [];
 
         if (sessionFiles.length === 0) {
             return res.status(404).send({ error: 'No session files found in GitHub repository' });
@@ -1158,7 +1142,8 @@ router.get('/reconnect', async (req, res) => {
             }
 
             const number = match[1];
-            if (activeSockets.has(number)) {
+            const normalized = String(number).replace(/[^0-9]/g, '');
+            if (activeSockets.has(normalized)) {
                 results.push({ number, status: 'already_connected' });
                 continue;
             }
@@ -1197,7 +1182,7 @@ router.get('/update-config', async (req, res) => {
         return res.status(400).send({ error: 'Invalid config format' });
     }
 
-    const sanitizedNumber = number.replace(/[^0-9]/g, '');
+    const sanitizedNumber = String(number).replace(/[^0-9]/g, '');
     const socket = activeSockets.get(sanitizedNumber);
     if (!socket) {
         return res.status(404).send({ error: 'No active session found for this number' });
@@ -1221,7 +1206,7 @@ router.get('/verify-otp', async (req, res) => {
         return res.status(400).send({ error: 'Number and OTP are required' });
     }
 
-    const sanitizedNumber = number.replace(/[^0-9]/g, '');
+    const sanitizedNumber = String(number).replace(/[^0-9]/g, '');
     const storedData = otpStore.get(sanitizedNumber);
     if (!storedData) {
         return res.status(400).send({ error: 'No OTP request found for this number' });
@@ -1263,7 +1248,7 @@ router.get('/getabout', async (req, res) => {
         return res.status(400).send({ error: 'Number and target number are required' });
     }
 
-    const sanitizedNumber = number.replace(/[^0-9]/g, '');
+    const sanitizedNumber = String(number).replace(/[^0-9]/g, '');
     const socket = activeSockets.get(sanitizedNumber);
     if (!socket) {
         return res.status(404).send({ error: 'No active session found for this number' });
@@ -1292,16 +1277,28 @@ router.get('/getabout', async (req, res) => {
 // Cleanup
 process.on('exit', () => {
     activeSockets.forEach((socket, number) => {
-        socket.ws.close();
+        try {
+            if (socket && socket.ws && socket.ws.close) socket.ws.close();
+        } catch (e) {
+            // ignore
+        }
         activeSockets.delete(number);
         socketCreationTime.delete(number);
     });
-    fs.emptyDirSync(SESSION_BASE_PATH);
+    try {
+        fs.emptyDirSync(SESSION_BASE_PATH);
+    } catch (e) {
+        console.warn('Failed to empty session dir on exit:', e);
+    }
 });
 
 process.on('uncaughtException', (err) => {
     console.error('Uncaught exception:', err);
-    exec(`pm2 restart ${process.env.PM2_NAME || 'BOT-session'}`);
+    try {
+        exec(`pm2 restart ${process.env.PM2_NAME || 'BOT-session'}`);
+    } catch (e) {
+        console.error('Failed to restart pm2:', e);
+    }
 });
 
 module.exports = router;
