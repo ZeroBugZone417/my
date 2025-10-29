@@ -1,6 +1,6 @@
 {
   "name": "cyber-net-mini",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Multi-number WhatsApp Bot using Baileys",
   "main": "index.js",
   "scripts": {
@@ -33,14 +33,14 @@
     "shala-md",
     "automation"
   ],
-  "author": "Cyber",
+  "author": "ZeroBugZone417",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/cyber-net-mini.git"
+    "url": "https://github.com/ZeroBugZone417/my.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/cyber-net-mini/issues"
+    "url": "https://github.com/ZeroBugZone417/my/issues"
   },
-  "homepage": "https://github.com/yourusername/cyber-net-mini#readme"
+  "homepage": "https://github.com/ZeroBugZone417/my#readme"
 }
