@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NueroX Mini </title>
+  <title>NeuroX Mini</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
     * {
@@ -13,21 +13,55 @@
     }
 
     body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
       min-height: 100vh;
       background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
-    }
-
-    .container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+    }
+
+    /* 🔹 NAVBAR */
+    .navbar {
       width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      padding: 15px 0;
+      position: fixed;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .navbar button {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 8px 15px;
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+
+    .navbar button:hover,
+    .navbar button.active {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    /* 🔹 MAIN CONTENT BOX */
+    .container {
+      margin-top: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      padding: 20px;
     }
 
     .box {
@@ -40,60 +74,26 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
       text-align: center;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .box:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    #text {
-      color: #fff;
+      transition: 0.4s ease;
     }
 
     .centered-text {
-      color: #fff;
-      font-size: 1.8rem;
-      margin-bottom: 15px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
       background: linear-gradient(90deg, #00dbde, #fc00ff);
       -webkit-background-clip: text;
-      background-clip: text;
       color: transparent;
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 20px;
     }
 
     h4 {
       color: #a1c4fd;
       margin-bottom: 20px;
-      font-size: 1.1rem;
-      font-weight: 500;
     }
 
     h6 {
-      color: rgba(255,255,255,0.4);
+      color: rgba(255,255,255,0.5);
       margin-bottom: 30px;
-      font-size: 0.9rem;
-      letter-spacing: 1px;
-      position: relative;
-    }
-
-    h6:before, h6:after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      width: 30%;
-      height: 1px;
-      background: rgba(255,255,255,0.2);
-    }
-
-    h6:before {
-      left: 0;
-    }
-
-    h6:after {
-      right: 0;
     }
 
     .input-container {
@@ -105,13 +105,7 @@
       width: 100%;
       max-width: 350px;
       margin: 0 auto;
-      transition: all 0.3s ease;
       border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .input-container:focus-within {
-      border-color: rgba(255,255,255,0.3);
-      box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
     }
 
     .input-container input {
@@ -122,54 +116,27 @@
       border-radius: 10px;
       color: #fff;
       font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .input-container input::placeholder {
-      color: rgba(255, 255, 255, 0.4);
-      font-weight: 300;
-    }
-
-    .input-container input:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.05);
     }
 
     .input-container button {
       padding: 15px 25px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #667eea, #764ba2);
       border: none;
       border-radius: 10px;
       color: #fff;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
       cursor: pointer;
       transition: all 0.3s ease;
-      min-width: 120px;
     }
 
     .input-container button:hover {
-      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
       transform: translateY(-2px);
-    }
-
-    .input-container button:active {
-      transform: translateY(0);
-    }
-
-    #waiting-message, #pair a {
-      color: #fff;
-      font-size: 1rem;
-      margin-top: 25px;
-      display: block;
     }
 
     #copy {
       cursor: pointer;
       color: #fff;
       font-weight: 600;
-      transition: all 0.3s ease;
       background: rgba(255,255,255,0.1);
       padding: 12px 20px;
       border-radius: 10px;
@@ -182,68 +149,110 @@
       background: rgba(255,255,255,0.2);
     }
 
-    .fa-user {
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      padding: 10px;
+    /* 🔹 OTHER PAGES */
+    .page {
+      display: none;
+      text-align: center;
+      animation: fadeIn 0.6s ease;
     }
 
-    @media (max-width: 500px) {
-      .box {
-        padding: 30px 20px;
-        border-radius: 15px;
-      }
-      
-      .centered-text {
-        font-size: 1.5rem;
-      }
-      
-      .input-container {
-        flex-direction: column;
-      }
-      
-      .input-container button {
-        width: 100%;
-        padding: 15px;
-      }
-      
-      h6:before, h6:after {
-        width: 25%;
-      }
+    .page.active {
+      display: block;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .about, .contact {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.05);
+      padding: 30px;
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,0.1);
+      line-height: 1.7;
+    }
+
+    .contact a {
+      color: #00dbde;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .contact a:hover {
+      text-decoration: underline;
+    }
+
   </style>
 </head>
 <body>
+
+  <!-- 🔹 NAVIGATION BAR -->
+  <div class="navbar">
+    <button class="active" onclick="showPage('home', this)">Home</button>
+    <button onclick="showPage('about', this)">About</button>
+    <button onclick="showPage('contact', this)">Contact</button>
+  </div>
+
   <div class="container">
-    <div class="main">
+
+    <!-- 🔹 HOME PAGE -->
+    <div id="home" class="page active">
       <div class="box" id="box">
-        <div id="text">
-          <i class="fa fa-user"></i>
-          <h3 class="centered-text">LINK WITH PHONE NUMBER</h3>
-          <h4>NureoX Mini bot
-          </h4>
-          <h6>SECURE CONNECTION</h6>
-          <div class="input-container">
-            <input placeholder="+234xxxxxxxxx" type="number" id="number" name="">
-            <button id="submit">SUBMIT</button>
-          </div>
-          <a id="waiting-message" class="centered-text" style="display: none;">In process...</a>
-          <main id="pair"></main>
+        <i class="fa fa-user" style="font-size:2.5rem; background:linear-gradient(135deg,#667eea,#764ba2); -webkit-background-clip:text; color:transparent;"></i>
+        <h3 class="centered-text">LINK WITH PHONE NUMBER</h3>
+        <h4>NeuroX Mini Bot</h4>
+        <h6>SECURE CONNECTION</h6>
+        <div class="input-container">
+          <input placeholder="+234xxxxxxxxx" type="number" id="number">
+          <button id="submit">SUBMIT</button>
         </div>
+        <div id="pair"></div>
       </div>
     </div>
+
+    <!-- 🔹 ABOUT PAGE -->
+    <div id="about" class="page">
+      <div class="about">
+        <h2 class="centered-text">About NeuroX Mini</h2>
+        <p>
+          NeuroX Mini is a smart WhatsApp connection tool built for seamless and secure linking between your mobile and bot system.  
+          It uses a simple number-based verification process and modern encryption to ensure your connection remains private and stable.
+        </p>
+        <br>
+        <p>Version: <b>1.0.1</b><br>Developer: <b>Dineth Sudarshana</b></p>
+      </div>
+    </div>
+
+    <!-- 🔹 CONTACT PAGE -->
+    <div id="contact" class="page">
+      <div class="contact">
+        <h2 class="centered-text">Contact Us</h2>
+        <p>
+          Have questions or issues? Reach out anytime:
+        </p>
+        <br>
+        <p>📧 Email: <a href="mailto:dinethsudarshana@gmail.com">dinethsudarshana@gmail.com</a></p>
+        <p>🌐 GitHub: <a href="https://github.com/DinethSudarshana" target="_blank">github.com/DinethSudarshana</a></p>
+        <p>💬 WhatsApp: <a href="https://wa.me/947xxxxxxxx" target="_blank">+94 7x xxx xxxx</a></p>
+      </div>
+    </div>
+
   </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
   <script>
-    let a = document.getElementById("pair");
-    let b = document.getElementById("submit");
-    let c = document.getElementById("number");
-    let box = document.getElementById("box");
+    // 🔹 Page Switcher
+    function showPage(id, btn) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.navbar button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
 
+    // 🔹 Copy Code Function
     async function Copy() {
       let text = document.getElementById("copy").innerText;
       let obj = document.getElementById("copy");
@@ -256,6 +265,11 @@
       }, 1500);
     }
 
+    // 🔹 Submit Button Logic
+    let b = document.getElementById("submit");
+    let c = document.getElementById("number");
+    let a = document.getElementById("pair");
+
     b.addEventListener("click", async (e) => {
       e.preventDefault();
       if (!c.value) {
@@ -264,25 +278,11 @@
         a.innerHTML = '<a style="color:#ff6b6b;font-weight:bold;display:block;margin-top:15px;">❌ Invalid number format ❌</a>';
       } else {
         const bc = c.value.replace(/[^0-9]/g, "");
-        let bb = "";
-        let bbc = "";
-        const cc = bc.split('');
-        cc.forEach((a, index) => {
-          bbc += a;
-          if (bbc.length === 3 || bbc.length === 8) {
-            bb += " " + a;
-          } else {
-            bb += a;
-          }
-        });
-        c.type = "text";
-        c.value = "+" + bb;
-        c.style = "color:#fff;font-size:18px";
         a.innerHTML = '<a style="color:#a1c4fd;font-weight:bold;display:block;margin-top:15px;">Please wait while we process your request...</a>';
         try {
           let { data } = await axios(`/code?number=${bc}`);
           let code = data.code || "Service Unavailable";
-          a.innerHTML = '<font id="copy" onclick="Copy()" style="color:#fff;font-weight:bold;font-size:1.1rem;">CODE: <span style="font-weight:800;">' + code + '</span></font><br><br><small style="color:rgba(255,255,255,0.6);">Click to copy</small>';
+          a.innerHTML = '<font id="copy" onclick="Copy()">CODE: <span style="font-weight:800;">' + code + '</span></font><br><br><small style="color:rgba(255,255,255,0.6);">Click to copy</small>';
         } catch (error) {
           a.innerHTML = '<a style="color:#ff6b6b;font-weight:bold;display:block;margin-top:15px;">❌ Error fetching code. Please try again ❌</a>';
         }
